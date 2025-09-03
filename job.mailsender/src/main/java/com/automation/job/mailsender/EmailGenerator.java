@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class Test2 {
+public class EmailGenerator {
     public static void main(String[] args) throws Exception {
     	
     	/* This is our API key for Hugging Face, it allows us to authenticate and use the DeepSeek model.*/
@@ -34,7 +34,7 @@ public class Test2 {
          * - In short, this line reads the entire job posts text file from our resources folder and loads its content 
          *   into memory as a single string.
          * */
-        ClassLoader classLoader = Test2.class.getClassLoader();
+        ClassLoader classLoader = EmailGenerator.class.getClassLoader();
         String fileContent = new String(Files.readAllBytes(Paths.get(classLoader.getResource("job_posts.txt").toURI())));
 
         
