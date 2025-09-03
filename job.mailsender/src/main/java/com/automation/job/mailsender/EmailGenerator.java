@@ -47,21 +47,23 @@ public class EmailGenerator {
             if (jobPost.isEmpty()) continue;
 
             /* This is our ai prompt */
-            String prompt = "Generate a professional email in French or english - based on the language of the job offer - "
-            		+ "applying for the following job. "
-                    + "The email should be generic but include relevant details from the job posting:\n\n"
-                    + jobPost + "\n\n"
-                    + "Use a polite and professional tone, including a short introduction, mention of attached CV and motivation letter, "
-                    + "and a closing signature with the name Touhafi Mouad."
-                    + "Do not use uncertain informations, here are my personal infos iy you need to use them."
-                    + "i am TOUHAFI Mouad, i have 3 and half years of experience in the automotive industry and also as automation engineer."
-                    + "my phone number is +212649244322."
-                    + "PS: Do not leave blank informations to fill. Also the main mail message must start with the object."
-                    + "PS: Surround object of the email message with ---"
-                    + "PS: Surround the main message including the signature of the message with *** so"
-                    + "i know where the mail starts and ends."
-                    + "PS: If the object of the email is mentionned in the job offer respect it, if it is not mentionned"
-                    + "make an object for the email based on the job position in the offer.";
+            String prompt =
+            	    "You are an AI that generates professional job application emails. " +
+            	    "Based on the language of the job offer (French or English), generate a JSON object with the following keys:\n\n" +
+            	    "1. subject: The subject of the email. Use the job post's subject if mentioned, otherwise create one based on the job position.\n" +
+            	    "2. message: The full email message including a short introduction, mention of attached CV and motivation letter, " +
+            	    "   and a polite closing signature with my name Touhafi Mouad and phone +212649244322. If you need infos about me to add," +
+            	    "   use this : i am TOUHAFI Mouad, i have 3 and half years of experience in the automotive industry and also as automation engineer." +
+            	    "3. receiver_email: The email address of the receiver if mentioned in the job post; otherwise null.\n\n" +
+            	    "Rules:\n" +
+            	    "- Do not leave any blank fields.\n" +
+            	    "- Use a professional and polite tone.\n" +
+            	    "- Avoid uncertain information.\n\n" +
+            	    "Job posting:\n" +
+            	    jobPost +
+            	    "\n\n" +
+            	    "Output ONLY the JSON object without extra text.";
+
 
 
             /* 
@@ -202,11 +204,17 @@ public class EmailGenerator {
                     JsonNode messageNode = choices.get(0).get("message");
                     if (messageNode != null && messageNode.has("content")) {
                         String generatedEmail = messageNode.get("content").asText();
-                        System.out.println("\n--- Generated Email for Job " + (i + 1) + " ---\n");
-                        System.out.println(generatedEmail);
-                        System.out.println("\n----------------------------------------\n");
-                        String[] splited = generatedEmail.split("\\*\\*\\*");
-                        System.out.println(splited[splited.length-1]);
+
+                        int startIndex = generatedEmail.indexOf("{");
+                        int endIndex = generatedEmail.lastIndexOf("}") + 1;
+
+                        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                            String jsonString = generatedEmail.substring(startIndex, endIndex);
+                            System.out.println(jsonString);
+                        } else {
+                            System.out.println("No valid JSON found in the response.");
+                        }
+                       
                     }
                 }
             } else {
