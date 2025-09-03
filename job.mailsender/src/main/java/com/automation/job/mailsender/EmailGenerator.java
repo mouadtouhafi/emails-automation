@@ -62,7 +62,7 @@ public class EmailGenerator {
             	    "Job posting:\n" +
             	    jobPost +
             	    "\n\n" +
-            	    "Output ONLY the JSON object without extra text.";
+            	    "Output ONLY the JSON object without extra text and use [receiver_email, message, subject] as json keys.";
 
 
 
@@ -204,17 +204,16 @@ public class EmailGenerator {
                     JsonNode messageNode = choices.get(0).get("message");
                     if (messageNode != null && messageNode.has("content")) {
                         String generatedEmail = messageNode.get("content").asText();
-
+                        
+                        /* Extracting the json response from the ai response */
                         int startIndex = generatedEmail.indexOf("{");
                         int endIndex = generatedEmail.lastIndexOf("}") + 1;
-
                         if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
                             String jsonString = generatedEmail.substring(startIndex, endIndex);
                             System.out.println(jsonString);
                         } else {
                             System.out.println("No valid JSON found in the response.");
                         }
-                       
                     }
                 }
             } else {
