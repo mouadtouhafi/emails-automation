@@ -18,7 +18,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class EmailGenerator {
-    public static void main(String[] args) throws Exception {
+	
+    public List<Map<String, String>> email_generator() throws Exception {
     	
     	/* This is our API key for Hugging Face, it allows us to authenticate and use the DeepSeek model.*/
     	String pathToken = "C:\\Users\\touhafi\\eclipse-workspace\\HaggingFaceToken.txt";
@@ -69,7 +70,8 @@ public class EmailGenerator {
             	    "Job posting:\n" +
             	    jobPost +
             	    "\n\n" +
-            	    "Output ONLY the JSON object without extra text and use [receiver_email, message, subject] as json keys.";
+            	    "Output ONLY the JSON object without extra text and use [receiver_email, message, subject] as json keys."+ 
+            	    "And if the offer contains more than one job, for each job you must generate a JSON object, separate them by commas like a real JSON file.";
 
 
 
@@ -212,36 +214,73 @@ public class EmailGenerator {
                     if (messageNode != null && messageNode.has("content")) {
                         String generatedEmail = messageNode.get("content").asText();
                         
+                        
                         /* Extracting the json response from the ai response */
                         int startIndex = generatedEmail.indexOf("{");
                         int endIndex = generatedEmail.lastIndexOf("}") + 1;
                         if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
                             String jsonString = generatedEmail.substring(startIndex, endIndex);
                             
+                            /* Checking if the ai-generated json contains one block or more than one block */
+                            char charTofind = '{';
+                            int charRepetition = 0;
+                            for(char c : jsonString.toCharArray()) {
+                            	if(c == charTofind) {
+                            		charRepetition++;
+                            	}
+                            }
                             
-                            
-                            
-                            try {
-                                JsonNode jsonNode = mapper.readTree(jsonString);
-                                Map<String, String> map_post_infos = new HashMap<String, String>();
-                                Iterator<String> fieldNames = jsonNode.fieldNames();
-                                while (fieldNames.hasNext()) {
-                                    String key = fieldNames.next();
-                                    String value = jsonNode.get(key).asText();
-                                    map_post_infos.put(key, value);
-                                    System.out.println(key + " ||| " + value);
-                                }
-                                
-                                last_data.add(map_post_infos);
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                            /* 
+                             * If there is more than one json block, we need to surround them with [ ]
+                             * to respect the json format [ {}, {} ]
+                             * */
+                            if(charRepetition > 1) {
+                            	jsonString = "[" + jsonString + "]";
                             }
                             
                             
                             
-                            System.out.println("===================================");
-                            System.out.println(jsonString);
+                            /*
+                             * This code parses jsonString into a JsonNode using Jackson and converts it into a list of maps
+                             * (last_data). 
+                             * It first checks whether the jsonStringToJSON JsonNode is an array or a single object. 
+                             * - If it’s an array, it iterates through each element, which represents a JSON object, 
+                             *   extracts all key-value pairs as strings, stores them in a HashMap, and adds each map 
+                             *   to last_data. 
+                             * - If the root is a single object, it directly iterates over its fields, 
+                             *   collects the key-value pairs into a map, and adds it to last_data. 
+                             * This way, the code handles both JSON arrays of objects and standalone JSON objects, 
+                             * producing a consistent List<Map<String, String>> representation.
+                             * */
+                            try {
+                                JsonNode jsonStringToJSON = mapper.readTree(jsonString);
+
+                                if (jsonStringToJSON.isArray()) {
+                                    for (JsonNode jsonNode : jsonStringToJSON) {
+                                        Map<String, String> map_post_infos = new HashMap<>();
+                                        Iterator<String> fieldNames = jsonNode.fieldNames();
+                                        while (fieldNames.hasNext()) {
+                                            String key = fieldNames.next();
+                                            String value = jsonNode.get(key).asText();
+                                            map_post_infos.put(key, value);
+                                        }
+                                        last_data.add(map_post_infos);
+                                    }
+                                } else if (jsonStringToJSON.isObject()) {
+                                    Map<String, String> map_post_infos = new HashMap<>();
+                                    Iterator<String> fieldNames = jsonStringToJSON.fieldNames();
+                                    while (fieldNames.hasNext()) {
+                                        String key = fieldNames.next();
+                                        String value = jsonStringToJSON.get(key).asText();
+                                        map_post_infos.put(key, value);
+                                    }
+                                    last_data.add(map_post_infos);
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
                         } else {
                             System.out.println("No valid JSON found in the response.");
                         }
@@ -250,8 +289,9 @@ public class EmailGenerator {
             } else {
                 System.err.println("Error calling API for Job " + (i + 1) + ". Status: " + response.statusCode());
             }
-
+            System.out.println(last_data);
             Thread.sleep(500);
         }
+		return last_data;
     }
 }
