@@ -95,7 +95,6 @@ public class NavigateToLink {
         if (fileContent.isEmpty()) {
             Files.write(path, postContent.getBytes(), StandardOpenOption.APPEND);
         } else {
-            // add separator if needed
             Files.write(path, ("\n|\n" + postContent).getBytes(), StandardOpenOption.APPEND);
         }
 
