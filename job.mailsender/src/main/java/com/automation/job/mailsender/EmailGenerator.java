@@ -108,8 +108,15 @@ public class EmailGenerator {
 		 * format. writeValueAsString(root) takes your top-level object, including all
 		 * nested objects and arrays like "messages", and turns it into something like :
 		 * 
-		 * { "model": "deepseek-ai/DeepSeek-V3.1:fireworks-ai", "messages": [ { "role":
-		 * "user", "content": "Write a short professional recruiter email..." } ] }
+		 * { 
+		 * 		"model": "deepseek-ai/DeepSeek-V3.1:fireworks-ai", 
+		 * 		"messages": [ 
+		 * 			{ 
+		 * 				"role": "user", 
+		 * 				"content": "Write a short professional recruiter email..." 
+		 * 			} 
+		 * 		] 
+		 * }
 		 *
 		 */
 		String requestBody = mapper.writeValueAsString(root);
