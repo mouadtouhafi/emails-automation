@@ -1,10 +1,8 @@
 package com.automation.job.mailsender;
 
-/**
- * Hello world!
- */
 public class App {
-    public static void main(String[] args) {
-        System.out.println("Hello World!");
+    public static void main(String[] args) throws Exception {
+        EmailDesigner emailDesigner = new EmailDesigner();
+        emailDesigner.design();
     }
 }
