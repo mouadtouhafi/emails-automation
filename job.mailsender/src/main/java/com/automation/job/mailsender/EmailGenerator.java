@@ -1,11 +1,16 @@
 package com.automation.job.mailsender;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +46,9 @@ public class EmailGenerator {
         /* This line splits job posts by | symbol */
         String[] jobPosts = fileContent.split("\\|");
 
-
+        /* This ArrayList contains a list of maps which contain the generated emails */
+        List<Map<String, String>> last_data = new ArrayList<Map<String,String>>();
+        
         for (int i = 0; i < jobPosts.length; i++) {
             String jobPost = jobPosts[i].trim();
             if (jobPost.isEmpty()) continue;
@@ -210,6 +217,30 @@ public class EmailGenerator {
                         int endIndex = generatedEmail.lastIndexOf("}") + 1;
                         if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
                             String jsonString = generatedEmail.substring(startIndex, endIndex);
+                            
+                            
+                            
+                            
+                            try {
+                                JsonNode jsonNode = mapper.readTree(jsonString);
+                                Map<String, String> map_post_infos = new HashMap<String, String>();
+                                Iterator<String> fieldNames = jsonNode.fieldNames();
+                                while (fieldNames.hasNext()) {
+                                    String key = fieldNames.next();
+                                    String value = jsonNode.get(key).asText();
+                                    map_post_infos.put(key, value);
+                                    System.out.println(key + " ||| " + value);
+                                }
+                                
+                                last_data.add(map_post_infos);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            
+                            
+                            
+                            System.out.println("===================================");
                             System.out.println(jsonString);
                         } else {
                             System.out.println("No valid JSON found in the response.");
