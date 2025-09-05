@@ -34,7 +34,7 @@ public class EmailDesigner {
         		
         		if(receiver_email != "null") {
         			EmailSender emailSender = new EmailSender();
-        			emailSender.mail_sender("cris97tiano@gmail.com", subject, message);
+        			emailSender.mail_sender(receiver_email, subject, message);
         		}else {
         			System.out.println("email not found");
         		}
