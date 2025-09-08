@@ -20,3 +20,8 @@ Before running the project, set up the following:
    Save your Hugging Face API key in a local .txt file.
 2. **Gmail App Password**  
    Save your Gmail App password in a local .txt file.
+   
+## Screenshots
+Here is a screenshot of the generated and sent email.
+
+<img src="Capture.png" width="900"/>
